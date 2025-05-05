@@ -1,0 +1,255 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model addresses {
+  id            Int       @id @default(autoincrement())
+  user_id       Int
+  address_line1 String    @db.VarChar(255)
+  address_line2 String?   @db.VarChar(255)
+  city          String    @db.VarChar(100)
+  state         String?   @db.VarChar(100)
+  postal_code   String    @db.VarChar(20)
+  country       String    @db.VarChar(100)
+  is_default    Boolean   @default(false)
+  deletedBy     Int       @default(0)
+  isDeleted     Boolean   @default(false)
+  deletedAt     DateTime? @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime  @default(now()) @db.Timestamptz(6)
+  users         users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  orders        orders[]
+}
+
+model brands {
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(100)
+  description String?
+  logo_url    String?    @db.VarChar(255)
+  deletedBy   Int        @default(0)
+  isDeleted   Boolean    @default(false)
+  deletedAt   DateTime?  @db.Timestamptz(6)
+  createdAt   DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime   @default(now()) @db.Timestamptz(6)
+  products    products[]
+}
+
+model cart_items {
+  id                 Int              @id @default(autoincrement())
+  cart_id            Int
+  product_variant_id Int
+  quantity           Int              @default(1)
+  price              Decimal          @db.Decimal(10, 2)
+  deletedBy          Int              @default(0)
+  isDeleted          Boolean          @default(false)
+  deletedAt          DateTime?        @db.Timestamptz(6)
+  createdAt          DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime         @default(now()) @db.Timestamptz(6)
+  carts              carts            @relation(fields: [cart_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product_variants   product_variants @relation(fields: [product_variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model carts {
+  id         Int          @id @default(autoincrement())
+  user_id    Int
+  session_id String?      @db.VarChar(255)
+  status     String       @default("active") @db.VarChar(20)
+  deletedBy  Int          @default(0)
+  isDeleted  Boolean      @default(false)
+  deletedAt  DateTime?    @db.Timestamptz(6)
+  createdAt  DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime     @default(now()) @db.Timestamptz(6)
+  cart_items cart_items[]
+  users      users        @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model categories {
+  id               Int          @id @default(autoincrement())
+  name             String       @db.VarChar(100)
+  description      String?
+  parent_id        Int?
+  deletedBy        Int          @default(0)
+  isDeleted        Boolean      @default(false)
+  deletedAt        DateTime?    @db.Timestamptz(6)
+  createdAt        DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime     @default(now()) @db.Timestamptz(6)
+  categories       categories?  @relation("categoriesTocategories", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_categories categories[] @relation("categoriesTocategories")
+  products         products[]
+}
+
+model order_items {
+  id                 Int              @id @default(autoincrement())
+  order_id           Int
+  product_variant_id Int
+  quantity           Int
+  unit_price         Decimal          @db.Decimal(10, 2)
+  total_price        Decimal          @db.Decimal(10, 2)
+  deletedBy          Int              @default(0)
+  isDeleted          Boolean          @default(false)
+  deletedAt          DateTime?        @db.Timestamptz(6)
+  createdAt          DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime         @default(now()) @db.Timestamptz(6)
+  orders             orders           @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product_variants   product_variants @relation(fields: [product_variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model orders {
+  id                 Int           @id @default(autoincrement())
+  user_id            Int
+  address_id         Int
+  order_number       String        @unique @db.VarChar(50)
+  order_date         DateTime      @default(now()) @db.Timestamptz(6)
+  total_amount       Decimal       @db.Decimal(10, 2)
+  tax_amount         Decimal       @default(0) @db.Decimal(10, 2)
+  shipping_amount    Decimal       @default(0) @db.Decimal(10, 2)
+  discount_amount    Decimal       @default(0) @db.Decimal(10, 2)
+  payment_status     String        @default("pending") @db.VarChar(20)
+  fulfillment_status String        @default("pending") @db.VarChar(20)
+  notes              String?
+  deletedBy          Int           @default(0)
+  isDeleted          Boolean       @default(false)
+  deletedAt          DateTime?     @db.Timestamptz(6)
+  createdAt          DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime      @default(now()) @db.Timestamptz(6)
+  order_items        order_items[]
+  addresses          addresses     @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users              users         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model product_images {
+  id            Int       @id @default(autoincrement())
+  product_id    Int
+  image_url     String    @db.VarChar(255)
+  is_primary    Boolean   @default(false)
+  display_order Int       @default(0)
+  deletedBy     Int       @default(0)
+  isDeleted     Boolean   @default(false)
+  deletedAt     DateTime? @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime  @default(now()) @db.Timestamptz(6)
+  products      products  @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model product_variants {
+  id               Int           @id @default(autoincrement())
+  product_id       Int
+  size             String        @db.VarChar(20)
+  color            String        @db.VarChar(50)
+  additional_price Decimal?      @default(0) @db.Decimal(10, 2)
+  stock_quantity   Int           @default(0)
+  sku              String        @db.VarChar(100)
+  deletedBy        Int           @default(0)
+  isDeleted        Boolean       @default(false)
+  deletedAt        DateTime?     @db.Timestamptz(6)
+  createdAt        DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime      @default(now()) @db.Timestamptz(6)
+  cart_items       cart_items[]
+  order_items      order_items[]
+  products         products      @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model products {
+  id               Int                @id @default(autoincrement())
+  name             String             @db.VarChar(255)
+  description      String?
+  price            Decimal            @db.Decimal(10, 2)
+  discount_price   Decimal?           @db.Decimal(10, 2)
+  category_id      Int
+  brand_id         Int
+  stock_quantity   Int                @default(0)
+  is_featured      Boolean            @default(false)
+  is_active        Boolean            @default(true)
+  deletedBy        Int                @default(0)
+  isDeleted        Boolean            @default(false)
+  deletedAt        DateTime?          @db.Timestamptz(6)
+  createdAt        DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime           @default(now()) @db.Timestamptz(6)
+  product_images   product_images[]
+  product_variants product_variants[]
+  brands           brands             @relation(fields: [brand_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  categories       categories         @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reviews          reviews[]
+  wishlists        wishlists[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model promotions {
+  id               Int       @id @default(autoincrement())
+  code             String    @unique @db.VarChar(50)
+  description      String?
+  discount_type    String    @db.VarChar(20)
+  discount_value   Decimal   @db.Decimal(10, 2)
+  minimum_purchase Decimal?  @default(0) @db.Decimal(10, 2)
+  start_date       DateTime  @db.Timestamptz(6)
+  end_date         DateTime  @db.Timestamptz(6)
+  usage_limit      Int?
+  usage_count      Int       @default(0)
+  is_active        Boolean   @default(true)
+  deletedBy        Int       @default(0)
+  isDeleted        Boolean   @default(false)
+  deletedAt        DateTime? @db.Timestamptz(6)
+  createdAt        DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime  @default(now()) @db.Timestamptz(6)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model reviews {
+  id                   Int       @id @default(autoincrement())
+  product_id           Int
+  user_id              Int
+  rating               Int
+  review_text          String?
+  is_verified_purchase Boolean   @default(false)
+  deletedBy            Int       @default(0)
+  isDeleted            Boolean   @default(false)
+  deletedAt            DateTime? @db.Timestamptz(6)
+  createdAt            DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime  @default(now()) @db.Timestamptz(6)
+  products             products  @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users                users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model users {
+  id         Int         @id @default(autoincrement())
+  email      String      @unique @db.VarChar(255)
+  username   String?     @unique @db.VarChar(50)
+  password   String      @db.VarChar(255)
+  role       String      @db.VarChar(20)
+  first_name String?     @db.VarChar(100)
+  last_name  String?     @db.VarChar(100)
+  phone      String?     @db.VarChar(20)
+  is_active  Boolean     @default(true)
+  deletedBy  Int         @default(0)
+  isDeleted  Boolean     @default(false)
+  deletedAt  DateTime?   @db.Timestamptz(6)
+  createdAt  DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime    @default(now()) @db.Timestamptz(6)
+  addresses  addresses[]
+  carts      carts[]
+  orders     orders[]
+  reviews    reviews[]
+  wishlists  wishlists[]
+}
+
+model wishlists {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  product_id Int
+  deletedBy  Int       @default(0)
+  isDeleted  Boolean   @default(false)
+  deletedAt  DateTime? @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime  @default(now()) @db.Timestamptz(6)
+  products   products  @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users      users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user_id, product_id])
+}
