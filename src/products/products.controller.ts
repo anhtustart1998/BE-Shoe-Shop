@@ -15,6 +15,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { CreateProductImageDto } from './dto/create-product-image.dto';
 import { CreateProductVariantDto } from './dto/create-product-variant.dto';
+import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
 import { ProductQueryDto } from './dto/product-query.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -249,11 +250,14 @@ export class ProductsController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
   @ApiForbiddenResponse({ description: 'Forbidden. Requires admin role.' })
   @ApiNotFoundResponse({ description: 'Product variant not found.' })
-  async updateProductVariant(
+  updateProductVariant(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateData: Partial<CreateProductVariantDto>,
+    @Body() updateProductVariantDto: UpdateProductVariantDto,
   ) {
-    return this.productsService.updateProductVariant(id, updateData);
+    return this.productsService.updateProductVariant(
+      id,
+      updateProductVariantDto,
+    );
   }
 
   @Delete('variants/:id')

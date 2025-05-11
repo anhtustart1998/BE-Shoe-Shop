@@ -98,7 +98,7 @@ export class BrandsController {
     return this.brandsService.update(id, updateBrandDto);
   }
 
-  @Delete('id')
+  @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @ApiBearerAuth()

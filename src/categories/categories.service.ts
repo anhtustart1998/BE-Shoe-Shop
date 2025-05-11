@@ -85,6 +85,7 @@ export class CategoriesService {
         subcategories: await this.getSubcategories(category.id),
       };
     }
+    return category;
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {

@@ -8,6 +8,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { CreateProductImageDto } from './dto/create-product-image.dto';
 import { CreateProductVariantDto } from './dto/create-product-variant.dto';
+import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
 import { ProductQueryDto } from './dto/product-query.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
@@ -282,7 +283,7 @@ export class ProductsService {
 
   async updateProductVariant(
     id: number,
-    updateData: Partial<CreateProductVariantDto>,
+    updateProductVariantDto: UpdateProductVariantDto,
   ) {
     // Check if variant exists
     const variant = await this.prisma.product_variants.findUnique({
@@ -290,13 +291,13 @@ export class ProductsService {
     });
 
     if (!variant) {
-      throw new NotFoundException(`Variant with ID ${id} not found`);
+      throw new NotFoundException(`Product variant with ID ${id} not found`);
     }
 
     // Update variant
     const updatedVariant = await this.prisma.product_variants.update({
       where: { id },
-      data: updateData,
+      data: updateProductVariantDto,
     });
 
     return updatedVariant;

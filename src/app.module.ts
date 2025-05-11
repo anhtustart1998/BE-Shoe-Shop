@@ -9,6 +9,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { BrandsModule } from './brands/brands.module';
+import { CartsModule } from './carts/carts.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { BrandsModule } from './brands/brands.module';
     ProductsModule,
     CategoriesModule,
     BrandsModule,
+    CartsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
