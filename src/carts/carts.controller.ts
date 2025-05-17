@@ -28,7 +28,7 @@ import {
   ApiNotFoundResponse,
 } from '@nestjs/swagger';
 
-@ApiTags('🛒 Cart Management')
+@ApiTags('🛒 Carts Management')
 @Controller('carts')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()

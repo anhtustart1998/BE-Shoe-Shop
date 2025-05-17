@@ -27,7 +27,7 @@ import {
 } from '@nestjs/swagger';
 import { UserResponseDto } from './dto/user-response.dto';
 
-@ApiTags('👩🏻‍💻 User Management')
+@ApiTags('👩🏻‍💻 Users Management')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
