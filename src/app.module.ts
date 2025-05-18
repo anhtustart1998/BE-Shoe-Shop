@@ -12,6 +12,7 @@ import { BrandsModule } from './brands/brands.module';
 import { CartsModule } from './carts/carts.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { OrdersModule } from './orders/orders.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { OrdersModule } from './orders/orders.module';
     CartsModule,
     AddressesModule,
     OrdersModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

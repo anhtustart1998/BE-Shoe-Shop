@@ -19,7 +19,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('[ Shoe Shop API ]')
     .setDescription('< API documentation for the 👟 Shoe Shop application />')
-    .setVersion('🍺 SS - Mk2C')
+    .setVersion('😸 SS - MK.3A')
     .addBearerAuth()
     .build();
 
