@@ -9,13 +9,18 @@ import {
   UseGuards,
   Query,
   ParseIntPipe,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { CreateProductWithImagesDto } from './dto/create-product-with-images.dto';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { CreateProductImageDto } from './dto/create-product-image.dto';
 import { CreateProductVariantDto } from './dto/create-product-variant.dto';
 import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
+import { AddMultipleProductImagesDto } from './dto/add-multiple-product-images.dto';
 import { ProductQueryDto } from './dto/product-query.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -34,6 +39,8 @@ import {
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
 
 @ApiTags('👟 Product Management')
@@ -283,5 +290,125 @@ export class ProductsController {
   @ApiNotFoundResponse({ description: 'Product variant not found.' })
   async removeProductVariant(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.removeProductVariant(id);
+  }
+
+  @Get(':id/images')
+  @ApiOperation({ summary: 'Get all images for a product' })
+  @ApiParam({ name: 'id', description: 'Product ID' })
+  @ApiOkResponse({
+    description: 'Product images retrieved successfully.',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'number' },
+          product_id: { type: 'number' },
+          image_url: { type: 'string' },
+          is_primary: { type: 'boolean' },
+          display_order: { type: 'number' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+      },
+    },
+  })
+  @ApiNotFoundResponse({ description: 'Product not found.' })
+  getAllProductImages(@Param('id', ParseIntPipe) id: number) {
+    return this.productsService.getAllProductImages(id);
+  }
+
+  @Post(':id/images/batch')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Add multiple images to a product (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Product ID' })
+  @ApiCreatedResponse({
+    description: 'Product images added successfully.',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'number' },
+          product_id: { type: 'number' },
+          image_url: { type: 'string' },
+          is_primary: { type: 'boolean' },
+          display_order: { type: 'number' },
+        },
+      },
+    },
+  })
+  @ApiBadRequestResponse({ description: 'Bad request. Invalid input data.' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
+  @ApiForbiddenResponse({ description: 'Forbidden. Requires admin role.' })
+  @ApiNotFoundResponse({ description: 'Product not found.' })
+  addMultipleProductImages(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() addMultipleProductImagesDto: AddMultipleProductImagesDto,
+  ) {
+    return this.productsService.addMultipleProductImages(
+      id,
+      addMultipleProductImagesDto,
+    );
+  }
+
+  @Post('with-images')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @UseInterceptors(FilesInterceptor('images', 8)) // Max 8 files with field name 'images'
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a new product with images (Admin only)' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', example: 'Nike Air Max' },
+        description: { type: 'string', example: 'Comfortable running shoes' },
+        price: { type: 'number', example: 129.99 },
+        discount_price: { type: 'number', example: 99.99 },
+        category_id: { type: 'integer', example: 1 },
+        brand_id: { type: 'integer', example: 1 },
+        stock_quantity: { type: 'integer', example: 100 },
+        is_featured: { type: 'boolean', example: true },
+        is_active: { type: 'boolean', example: true },
+        image_metadata: {
+          type: 'string',
+          example:
+            '[{"is_primary": true, "display_order": 1}, {"is_primary": false, "display_order": 2}]',
+          description: 'JSON string of image metadata',
+        },
+        images: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+          maxItems: 8,
+          description: 'Product images (max 8 files)',
+        },
+      },
+      required: ['name', 'price', 'category_id', 'brand_id'],
+    },
+  })
+  @ApiCreatedResponse({
+    description: 'The product has been successfully created with images.',
+    type: ProductResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad request. Invalid input data or too many images.',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
+  @ApiForbiddenResponse({ description: 'Forbidden. Requires admin role.' })
+  createProductWithImages(
+    @Body() createProductDto: CreateProductWithImagesDto,
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {
+    return this.productsService.createProductWithImages(
+      createProductDto,
+      files,
+    );
   }
 }
