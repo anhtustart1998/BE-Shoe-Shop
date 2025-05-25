@@ -41,6 +41,7 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+.env.production
 
 # temp directory
 .temp
@@ -52,7 +53,39 @@ pids
 *.seed
 *.pid.lock
 
-.pem
+# AWS and Security files
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+aws-credentials
+.aws/credentials
+
+# Docker files (if you want to exclude them)
+docker-compose.override.yml
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.backup
+*.bak
+*.tmp
+
+# Application specific
+uploads/
+storage/
+monitor.log
+
+# Package manager locks (optional - choose based on your preference)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
