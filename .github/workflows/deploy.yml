@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install NestJS CLI
+        run: npm install -g @nestjs/cli
+
       - name: Generate Prisma client
         run: npx prisma generate
 
