@@ -9,12 +9,11 @@ COPY prisma ./prisma/
 # Install dependencies
 RUN npm ci --only=production && npm cache clean --force
 
-
-# Cofy source code
+# Copy source code
 COPY . . 
 
 # Generate Prisma Client
-RUN npx prisma Generate
+RUN npx prisma generate
 
 # Build the application
 RUN npm run build
@@ -24,7 +23,7 @@ FROM node:18-alpine AS production
 
 RUN apk add --no-cache dumb-init curl
 
-WORKDIR /application
+WORKDIR /app
 
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nestjs -u 1001
@@ -44,4 +43,3 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 # Start the application
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "dist/main.js"]
-
